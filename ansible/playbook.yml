@@ -1,0 +1,24 @@
+---
+- name: Consume custom facts
+  hosts: all
+  become: yes
+
+  roles:
+    - role: geerlingguy.docker
+
+  tasks:
+    - name: add vagrant user to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+    - name: update /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        line: "{{ item.ip }}    {{ item.hostname }}"
+        regexp: ".*{{ item.hostname }}$"
+        state: present
+        insertafter: EOF
+      with_items:
+        "{{ etc_hosts | default([]) }}"

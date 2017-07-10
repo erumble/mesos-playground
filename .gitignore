@@ -1,0 +1,6 @@
+.vagrant
+**/*.retry
+**/*.swp
+**/.idea
+ansible/roles
+mesos

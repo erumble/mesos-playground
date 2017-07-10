@@ -1,0 +1,67 @@
+version: '3'
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+
+services:
+  zookeeper:
+    image: zookeeper
+    ports:
+      - '2181:2181'
+      - '2888:2888'
+      - '3888:3888'
+
+  mesos-master:
+    image: mesosphere/mesos-master:1.3.0
+    ports:
+      - '5050:5050'
+    environment:
+      MESOS_PORT: 5050
+      MESOS_HOSTNAME: mesos.invalid
+      MESOS_ZK: zk://zookeeper:2181/mesos
+      MESOS_QUORUM: 1
+      MESOS_REGISTRY: in_memory
+      MESOS_LOG_DIR: /var/log/mesos
+      MESOS_WORK_DIR: /var/lib/mesos
+    volumes:
+      - ./mesos/master/logs:/var/log/mesos
+    depends_on:
+      - zookeeper
+
+  mesos-slave:
+    image: mesosphere/mesos-slave:1.3.0
+    ports:
+      - '5051:5051'
+    environment:
+      MESOS_PORT: 5051
+      MESOS_HOSTNAME: mesos.invalid
+      MESOS_MASTER: zk://zookeeper:2181/mesos
+      MESOS_SWITCH_USER: 0
+      MESOS_CONTAINERIZERS: docker,mesos
+      MESOS_LOG_DIR: /var/log/mesos
+      MESOS_WORK_DIR: /var/lib/mesos
+    volumes:
+      - ./mesos/slave/logs:/var/log/mesos
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /cgroup:/cgroup
+      - /sys:/sys
+      - /usr/local/bin/docker:/usr/local/bin/docker
+    depends_on:
+      - zookeeper
+
+  marathon:
+    image: mesosphere/marathon
+    ports:
+      - '8080:8080'
+    environment:
+      MARATHON_HOSTNAME: mesos.invalid
+      MARATHON_MASTER: zk://zookeeper:2181/mesos
+      MARATHON_ZK: zk://zookeeper:2181/marathon
+    depends_on:
+      - zookeeper
+      - mesos-master
+    extra_hosts:
+      - "mesos.invalid:172.18.0.1"

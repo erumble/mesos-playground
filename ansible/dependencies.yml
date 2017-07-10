@@ -1,0 +1,6 @@
+---
+# Ansible Galaxy roles
+# Vagrant will install the roles listed here in the `roles` dir next to the playbook
+
+# roles from ansible galaxy https://galaxy.ansible.com
+- src: geerlingguy.docker
