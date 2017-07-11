@@ -65,3 +65,20 @@ services:
       - mesos-master
     extra_hosts:
       - "${HOSTNAME}:172.18.0.1"
+
+  chronos:
+    image: mesosphere/chronos:v3.0.2
+    ports:
+      - '4400:8080'
+    environment:
+      PORT0: '8080'
+      PORT1: '8081'
+      # CHRONOS_HOSTNAME: ${HOSTNAME}
+      # CHRONOS_MASTER: zk://zookeeper:2181/mesos
+      # CHRONOS_ZK: zk://zookeeper:2181/chronos
+    command: --zk_hosts zookeeper:2181 --master zk://zookeeper:2181/mesos
+    depends_on:
+      - zookeeper
+      - mesos-master
+    extra_hosts:
+      - "${HOSTNAME}:172.18.0.1"
