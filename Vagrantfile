@@ -29,8 +29,8 @@ Vagrant.configure(vagrantfile_api_version) do |config|
 
     # give the box some resources
     box.vm.provider 'virtualbox' do |v|
-      v.memory = 2048
-      v.cpus = 2
+      v.memory = 8196
+      v.cpus = 4
     end
 
     # forward the ssh agent for things like git
